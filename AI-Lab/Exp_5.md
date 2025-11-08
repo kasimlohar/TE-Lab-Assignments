@@ -1,266 +1,174 @@
-# Experiment 5: Selection Sort & Kruskal's Algorithm (MST)
+# 🧠 Experiment 5: Selection Sort & Kruskal's Algorithm (MST)
 
-## Overview
-
-This experiment demonstrates two fundamental algorithms:
-1. **Selection Sort** - A simple comparison-based sorting algorithm
-2. **Kruskal's Algorithm** - A greedy algorithm for finding Minimum Spanning Trees (MST)
+## 🎯 Aim
+To implement **Selection Sort** algorithm for sorting arrays and **Kruskal's Algorithm** for finding the **Minimum Spanning Tree (MST)** using **Disjoint Set (Union-Find)** data structure.
 
 ---
 
-## Part 1: Selection Sort
+## 📘 Theory (For Viva)
 
-### Theory
+### 1️⃣ Selection Sort
+- **Concept:**  
+  Selection Sort is a simple comparison-based sorting algorithm that repeatedly finds the minimum element from the unsorted portion and places it at the beginning.
+- **Strategy:** Divide array into sorted and unsorted portions, repeatedly select minimum
+- **Applications:** Small datasets, educational purposes, situations requiring minimal swaps.
 
-**Selection Sort** is one of the simplest sorting algorithms that works by repeatedly finding the minimum element from the unsorted portion and placing it at the beginning.
-
-### Algorithm Principle
-
-The algorithm divides the input list into two parts:
-- **Sorted portion**: Elements at the beginning (initially empty)
-- **Unsorted portion**: Remaining elements
-
-### Working Steps
-
+**Key Steps:**
 1. Find the smallest element in the unsorted array
 2. Swap it with the first element of unsorted portion
 3. Move the boundary between sorted and unsorted portions
 4. Repeat until the entire array is sorted
 
-### Pseudocode
-
+**Algorithm:**
 ```
-function selectionSort(arr):
-    n = length(arr)
-    for i = 0 to n-1:
-        min_index = i
-        for j = i+1 to n-1:
-            if arr[j] < arr[min_index]:
-                min_index = j
-        swap arr[i] with arr[min_index]
-    return arr
+SELECTION_SORT(arr):
+1. n = length(arr)
+2. FOR i = 0 to n-1:
+   a. min_index = i
+   b. FOR j = i+1 to n-1:
+      IF arr[j] < arr[min_index]:
+        min_index = j
+   c. SWAP arr[i] with arr[min_index]
+3. RETURN arr
 ```
-
-### Example Execution
-
-```
-Initial: [64, 25, 12, 22, 11, 90]
-
-Pass 1: Find min in [64, 25, 12, 22, 11, 90] → 11
-Result: [11, 25, 12, 22, 64, 90]
-
-Pass 2: Find min in [25, 12, 22, 64, 90] → 12  
-Result: [11, 12, 25, 22, 64, 90]
-
-Pass 3: Find min in [25, 22, 64, 90] → 22
-Result: [11, 12, 22, 25, 64, 90]
-
-Pass 4: Find min in [25, 64, 90] → 25
-Result: [11, 12, 22, 25, 64, 90]
-
-Pass 5: Find min in [64, 90] → 64
-Result: [11, 12, 22, 25, 64, 90]
-
-Final: [11, 12, 22, 25, 64, 90]
-```
-
-### Complexity Analysis
-
-| Metric | Complexity |
-|--------|------------|
-| **Time Complexity** | O(n²) in all cases |
-| **Space Complexity** | O(1) - in-place sorting |
-| **Best Case** | O(n²) |
-| **Average Case** | O(n²) |
-| **Worst Case** | O(n²) |
-
-### Characteristics
-
-- **✅ Advantages:**
-  - Simple implementation
-  - In-place sorting (O(1) extra space)
-  - Minimizes number of swaps (O(n) swaps)
-  - Performance doesn't depend on input order
-
-- **❌ Disadvantages:**
-  - Poor time complexity O(n²)
-  - Not suitable for large datasets
-  - Not stable (doesn't preserve relative order of equal elements)
 
 ---
 
-## Part 2: Kruskal's Algorithm for MST
+### 2️⃣ Kruskal's Algorithm for MST
+- **Concept:**  
+  Kruskal's Algorithm is a greedy algorithm that finds the Minimum Spanning Tree by selecting edges in order of increasing weight while avoiding cycles.
+- **Strategy:** Sort edges by weight, use Union-Find to detect cycles
+- **Applications:** Network design, clustering, transportation planning.
 
-### Theory
+**Key Steps:**
+1. Sort all edges by weight in ascending order
+2. Initialize disjoint set for all vertices
+3. For each edge, check if it connects different components
+4. If yes, add edge to MST and union the components
+5. Stop when MST has (V-1) edges
 
-**Kruskal's Algorithm** is a greedy algorithm used to find the Minimum Spanning Tree (MST) of a weighted, undirected graph.
+**Algorithm:**
+```
+KRUSKAL(vertices, edges):
+1. SORT edges by weight in ascending order
+2. Initialize disjoint_set for all vertices
+3. mst = empty list
+4. total_weight = 0
 
-### Minimum Spanning Tree (MST)
+5. FOR each edge (u, v, weight) in sorted_edges:
+   a. IF find(u) != find(v):  // Different components
+      i. union(u, v)
+      ii. ADD (u, v, weight) to mst
+      iii. total_weight += weight
+6. RETURN mst, total_weight
 
-An MST is a subset of edges that:
-- Connects all vertices in the graph
-- Has no cycles (forms a tree)
-- Has minimum total edge weight among all possible spanning trees
+UNION-FIND Operations:
+FIND(u): Return root of component containing u (with path compression)
+UNION(u, v): Merge components containing u and v
+```
 
-### Key Concepts
+---
 
-#### 1. Disjoint Set (Union-Find) Data Structure
-
-Used to efficiently detect cycles during MST construction:
+## 💻 Python Code
 
 ```python
+# Selection Sort and Kruskal's Algorithm Implementation
+
+# Selection Sort Implementation
+def selection_sort(arr):
+    n = len(arr)
+    for i in range(n):
+        min_index = i  # Assume the current element is the smallest
+        for j in range(i + 1, n):
+            if arr[j] < arr[min_index]:
+                min_index = j  # Update the min_index if a smaller element is found
+        arr[i], arr[min_index] = arr[min_index], arr[i]  # Swap the found minimum element with the first element
+    return arr
+
+# Take input from the user for Selection Sort
+arr = list(map(int, input("Enter the array elements separated by space: ").split()))
+sorted_arr = selection_sort(arr)
+print("Sorted array:", sorted_arr)
+
+
+# Kruskal's Algorithm using Disjoint Set (Union-Find)
+
 class DisjointSet:
     def __init__(self, n):
-        self.parent = list(range(n))  # Each node is its own parent initially
-    
+        self.parent = list(range(n))
+
     def find(self, u):
         if u != self.parent[u]:
             self.parent[u] = self.find(self.parent[u])  # Path compression
         return self.parent[u]
-    
+
     def union(self, u, v):
-        self.parent[self.find(u)] = self.find(v)  # Union operation
-```
+        self.parent[self.find(u)] = self.find(v)
 
-#### 2. Path Compression Optimization
-
-In the `find` operation, we compress paths to make future operations faster by making every node point directly to the root.
-
-### Kruskal's Algorithm Steps
-
-1. **Sort all edges** by weight in ascending order
-2. **Initialize** disjoint set for all vertices
-3. **For each edge** in sorted order:
-   - Check if edge connects vertices in different components
-   - If yes, add edge to MST and union the components
-   - If no, skip edge (would create cycle)
-4. **Stop** when MST has (V-1) edges
-
-### Pseudocode
-
-```
-function kruskal(vertices, edges):
-    sort edges by weight
-    initialize disjoint_set
-    mst = []
-    total_weight = 0
+def kruskal(n, edges):
+    edges.sort(key=lambda x: x[2])  # Sort edges by weight
+    ds = DisjointSet(n)
+    mst, total_weight = [], 0
     
-    for each edge (u, v, weight) in sorted_edges:
-        if find(u) != find(v):  // Different components
-            union(u, v)
-            add (u, v, weight) to mst
-            total_weight += weight
-    
+    for u, v, w in edges:
+        if ds.find(u) != ds.find(v):  # Different components, no cycle
+            ds.union(u, v)
+            mst.append((u, v, w))
+            total_weight += w
     return mst, total_weight
+
+# Take input from the user for Kruskal's Algorithm
+n = int(input("Enter the number of vertices: "))
+m = int(input("Enter the number of edges: "))
+edges = [tuple(map(int, input("Enter edge (u, v, weight): ").strip().split())) for _ in range(m)]
+mst, total_weight = kruskal(n, edges)
+
+print("\nEdges in the Minimum Spanning Tree:")
+for u, v, w in mst:
+    print(f"{u}-{v} (weight: {w})")
+print(f"\nTotal weight of MST: {total_weight}")
 ```
 
-### Example Execution
+---
+
+## 🧾 Sample Output
 
 ```
-Graph with edges: [(0,1,4), (0,2,3), (1,2,1), (1,3,2), (2,3,4)]
+Enter the array elements separated by space: 64 25 12 22 11 90
+Sorted array: [11, 12, 22, 25, 64, 90]
 
-Step 1: Sort edges by weight
-Sorted: [(1,2,1), (1,3,2), (0,2,3), (0,1,4), (2,3,4)]
+Enter the number of vertices: 4
+Enter the number of edges: 5
+Enter edge (u, v, weight): 0 1 4
+Enter edge (u, v, weight): 0 2 3
+Enter edge (u, v, weight): 1 2 1
+Enter edge (u, v, weight): 1 3 2
+Enter edge (u, v, weight): 2 3 4
 
-Step 2: Process edges
-Edge (1,2,1): Components {1}, {2} → Union → Add to MST
-Edge (1,3,2): Components {1,2}, {3} → Union → Add to MST  
-Edge (0,2,3): Components {0}, {1,2,3} → Union → Add to MST
-Edge (0,1,4): Components {0,1,2,3} → Skip (would create cycle)
-Edge (2,3,4): Components {0,1,2,3} → Skip (would create cycle)
+Edges in the Minimum Spanning Tree:
+1-2 (weight: 1)
+1-3 (weight: 2)
+0-2 (weight: 3)
 
-MST: [(1,2,1), (1,3,2), (0,2,3)]
-Total weight: 6
+Total weight of MST: 6
 ```
 
-### Complexity Analysis
+---
 
-| Operation | Time Complexity |
-|-----------|----------------|
-| **Sorting edges** | O(E log E) |
-| **Union-Find operations** | O(E α(V)) |
-| **Overall** | **O(E log E)** |
+## 🧠 Viva Tips
 
-Where:
-- E = number of edges
-- V = number of vertices  
-- α = inverse Ackermann function (practically constant)
+* **Selection Sort** has **O(n²)** time complexity but uses **minimal swaps** O(n).
+* **Kruskal's algorithm** uses **greedy approach** - always pick minimum weight edge that doesn't create cycle.
+* **Union-Find** data structure efficiently detects cycles with **path compression** optimization.
+* **MST properties**: Exactly **(V-1) edges** for V vertices, **no cycles**, **minimum total weight**.
+* **Time complexity** of Kruskal's: **O(E log E)** dominated by edge sorting.
+* **Space complexity**: O(1) for Selection Sort, **O(V)** for Union-Find in Kruskal's.
+* **Cut property**: Minimum weight edge crossing any cut is always in some MST.
 
-### Space Complexity
-- O(V) for disjoint set data structure
-- O(E) for storing edges
+---
 
-### Kruskal's vs Other MST Algorithms
+## ✅ Conclusion
 
-| Algorithm | Time Complexity | Best For |
-|-----------|----------------|----------|
-| **Kruskal's** | O(E log E) | Sparse graphs |
-| **Prim's** | O(E log V) | Dense graphs |
-
-### Applications of MST
-
-1. **Network Design**
-   - Minimum cost to connect all computers in network
-   - Optimal cable/fiber layout
-
-2. **Transportation**
-   - Minimum cost road network
-   - Airline route optimization
-
-3. **Clustering**
-   - Data mining and machine learning
-   - Image segmentation
-
-4. **Approximation Algorithms**
-   - Traveling Salesman Problem (TSP)
-   - Steiner Tree problems
-
-### Greedy Choice Property
-
-Kruskal's algorithm works because of the **greedy choice property**:
-- At each step, choosing the minimum weight edge that doesn't create a cycle leads to optimal solution
-- This is proven using the **cut property** of MSTs
-
-### Cut Property
-
-For any cut in a graph, the minimum weight edge crossing the cut is always in some MST.
-
-## Implementation Notes
-
-### Error Handling Considerations
-
-```python
-# Validate input
-if n <= 0:
-    print("Number of vertices must be positive")
-    
-# Check for valid edge format
-try:
-    u, v, w = map(int, input().split())
-except ValueError:
-    print("Invalid edge format")
-```
-
-### Memory Optimization
-
-- Use adjacency list for sparse graphs
-- Implement union by rank for better Union-Find performance
-
-### Practical Considerations
-
-1. **Input validation** for graph connectivity
-2. **Handling disconnected graphs** (forest of MSTs)
-3. **Dealing with negative weights** (algorithm still works)
-4. **Multiple MSTs** with same total weight
-
-## Conclusion
-
-This experiment demonstrates:
-- **Selection Sort**: Simple O(n²) sorting with minimal swaps
-- **Kruskal's Algorithm**: Efficient O(E log E) MST algorithm using greedy approach and Union-Find
-
-Both algorithms showcase different algorithmic paradigms:
-- Selection sort uses **brute force** approach
-- Kruskal's uses **greedy** strategy with sophisticated data structures
-
-The combination illustrates the evolution from simple algorithms to more sophisticated ones that solve complex graph problems efficiently.
+Both algorithms demonstrate different paradigms: **Selection Sort** uses simple comparison-based approach while **Kruskal's Algorithm** employs greedy strategy with sophisticated data structures.
+Selection Sort is educational for understanding basic sorting, while Kruskal's is practical for **network design** and **optimization problems**.
+They showcase the evolution from **brute force** to **intelligent algorithmic techniques**.

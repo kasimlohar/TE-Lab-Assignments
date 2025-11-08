@@ -1,149 +1,208 @@
-# Experiment 3: Alpha-Beta Pruning Algorithm
+# 🧠 Experiment 3: Alpha-Beta Pruning Algorithm for Game AI
 
-## What is Alpha-Beta Pruning?
+## 🎯 Aim
+To implement the **Alpha-Beta Pruning algorithm** as an optimization technique for the **Minimax algorithm** in a **Tic-Tac-Toe game** to demonstrate efficient game tree search and AI decision making.
 
-Alpha-Beta pruning is an optimization technique for the **Minimax algorithm** used in game theory and decision-making. It significantly reduces the number of nodes evaluated in the search tree by eliminating branches that cannot possibly influence the final decision.
+---
 
-## How Alpha-Beta Pruning Works
+## 📘 Theory (For Viva)
 
-The algorithm maintains two values:
+### 🎮 Alpha-Beta Pruning Overview
+- **Concept:**  
+  Alpha-Beta pruning is an optimization technique for the **Minimax algorithm** that eliminates branches in the game tree that cannot possibly influence the final decision.
+- **Key Feature:** Maintains optimality while significantly reducing computation time
+- **Applications:** Game AI (Chess, Checkers, Tic-Tac-Toe), decision trees, strategic planning.
+
+### 🔢 Alpha-Beta Values
+The algorithm maintains two crucial values:
 - **Alpha (α)**: The best value that the **maximizing player** can guarantee so far
 - **Beta (β)**: The best value that the **minimizing player** can guarantee so far
 
-### Key Principle: Pruning Condition
-**If α ≥ β, prune the remaining branches**
+**Key Steps:**
+1. Initialize α = -∞ and β = +∞
+2. For each node, update α (for maximizing) or β (for minimizing)
+3. If α ≥ β at any point, prune remaining branches
+4. Return the optimal value without exploring pruned branches
 
-This happens because:
-- Maximizing player will choose a value ≥ α
-- Minimizing player will choose a value ≤ β
-- If α ≥ β, no better solution exists in this branch
-
-## Algorithm Steps
-
+**Algorithm:**
 ```
-function alphabeta(node, depth, alpha, beta, maximizing_player):
-    if depth == 0 or node is terminal:
-        return heuristic_value(node)
-    
-    if maximizing_player:
-        max_eval = -∞
-        for each child of node:
-            eval = alphabeta(child, depth-1, alpha, beta, False)
-            max_eval = max(max_eval, eval)
-            alpha = max(alpha, eval)
-            if beta <= alpha:
-                break  # β cutoff (prune)
-        return max_eval
-    else:
-        min_eval = +∞
-        for each child of node:
-            eval = alphabeta(child, depth-1, alpha, beta, True)
-            min_eval = min(min_eval, eval)
-            beta = min(beta, eval)
-            if beta <= alpha:
-                break  # α cutoff (prune)
-        return min_eval
+ALPHA_BETA(node, depth, alpha, beta, maximizing_player):
+1. IF depth == 0 OR node is terminal:
+   RETURN evaluate(node)
+
+2. IF maximizing_player:
+   max_eval = -∞
+   FOR each child of node:
+     eval = ALPHA_BETA(child, depth-1, alpha, beta, FALSE)
+     max_eval = max(max_eval, eval)
+     alpha = max(alpha, eval)
+     IF beta <= alpha:
+       BREAK  // β cutoff (prune)
+   RETURN max_eval
+
+3. ELSE: // minimizing player
+   min_eval = +∞
+   FOR each child of node:
+     eval = ALPHA_BETA(child, depth-1, alpha, beta, TRUE)
+     min_eval = min(min_eval, eval)
+     beta = min(beta, eval)
+     IF beta <= alpha:
+       BREAK  // α cutoff (prune)
+   RETURN min_eval
 ```
 
-## Tic-Tac-Toe Implementation Details
+---
 
-### Game Representation
-- **Board**: 3x3 matrix with values:
-  - `1`: Player X (Human)
-  - `-1`: Player O (Computer)
-  - `0`: Empty cell
+### 🎯 Minimax with Alpha-Beta in Tic-Tac-Toe
+- **Game Representation:** 3×3 grid with values: 1 (Player X), -1 (Computer O), 0 (Empty)
+- **Evaluation Function:** 
+  - Player wins: +10 - depth (prefer faster wins)
+  - Computer wins: depth - 10 (prefer delayed losses)
+  - Draw: 0
 
-### Evaluation Function
-```python
-if winner == 1: return 10 - depth    # Player wins (minimize computer's advantage)
-if winner == -1: return depth - 10   # Computer wins (maximize computer's advantage)
-if no moves: return 0                # Draw
-```
+**Pruning Condition:**
+**If α ≥ β, prune remaining branches** because no better solution exists.
 
-The depth factor ensures:
-- **Faster wins are preferred** (lower depth = higher score)
-- **Delayed losses are preferred** (higher depth = less negative score)
+---
 
-### Movement Strategy
-- **Computer (Minimizing Player)**: Seeks lowest score (best for computer)
-- **Player (Maximizing Player)**: Algorithm assumes player seeks highest score
+## 🧩 Algorithm Summary
 
-## Alpha-Beta vs Pure Minimax
+| Aspect | Minimax | Alpha-Beta | Pure Search |
+|--------|---------|------------|-------------|
+| Data Structure | Game Tree | Game Tree (Pruned) | Full Exploration |
+| Approach | Complete tree search | Intelligent pruning | Brute force |
+| Uses | Game AI, Decision trees | Optimized game AI | Simple games |
+| Time Complexity | O(b^d) | O(b^(d/2)) best case | O(b^d) |
+| Space Complexity | O(d) | O(d) | O(d) |
+| Optimality | ✅ | ✅ | ✅ |
 
-| Aspect | Minimax | Alpha-Beta |
-|--------|---------|------------|
-| **Optimality** | ✅ Optimal | ✅ Optimal (same result) |
-| **Time Complexity** | O(b^d) | O(b^(d/2)) in best case |
-| **Space Complexity** | O(d) | O(d) |
-| **Pruning** | ❌ None | ✅ Significant branch elimination |
-
-Where:
-- **b** = branching factor (average moves per position)
-- **d** = maximum depth of search tree
+**b** = branching factor, **d** = maximum depth
 
 ## Pruning Efficiency
 
-### Best Case Scenario
-- Nodes are ordered optimally (best moves first)
-- Time complexity reduces from O(b^d) to O(b^(d/2))
-- **Up to 50% reduction** in nodes evaluated
+#---
 
-### Worst Case Scenario
-- Nodes are ordered poorly (worst moves first)
-- No pruning occurs
-- Performance equals standard Minimax
+## 💻 Python Code
 
-## Key Features in Our Implementation
-
-### 1. Game State Evaluation
 ```python
+from random import choice
+from math import inf
+
+board = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+
+def print_board():
+    chars = {1: 'X', -1: 'O', 0: ' '}
+    for row in board:
+        print('|'.join(f' {chars[cell]} ' for cell in row))
+        print('-' * 11)
+
 def check_winner():
-    # Check all rows, columns, and diagonals
-    # Returns: 1 (Player wins), -1 (Computer wins), 0 (No winner yet)
-```
+    # Check rows, columns, diagonals
+    for i in range(3):
+        if board[i][0] == board[i][1] == board[i][2] != 0:
+            return board[i][0]
+        if board[0][i] == board[1][i] == board[2][i] != 0:
+            return board[0][i]
+    if board[0][0] == board[1][1] == board[2][2] != 0:
+        return board[0][0]
+    if board[0][2] == board[1][1] == board[2][0] != 0:
+        return board[0][2]
+    return 0
 
-### 2. Alpha-Beta Pruning Logic
-```python
-if player == 1:  # Maximizing
-    alpha = max(alpha, eval)
-    if beta <= alpha: break  # β cutoff
-else:  # Minimizing  
-    beta = min(beta, eval)
-    if beta <= alpha: break  # α cutoff
-```
+def get_empty_cells():
+    return [(i, j) for i in range(3) for j in range(3) if board[i][j] == 0]
 
-### 3. Computer Move Selection
-```python
+def minimax(depth, player, alpha, beta):
+    winner = check_winner()
+    
+    if winner == 1: return 10 - depth
+    if winner == -1: return depth - 10
+    if not get_empty_cells(): return 0
+    
+    if player == 1:  # Maximizing
+        max_eval = -inf
+        for i, j in get_empty_cells():
+            board[i][j] = 1
+            eval = minimax(depth + 1, -1, alpha, beta)
+            board[i][j] = 0
+            max_eval = max(max_eval, eval)
+            alpha = max(alpha, eval)
+            if beta <= alpha: break  # Pruning
+        return max_eval
+    else:  # Minimizing
+        min_eval = inf
+        for i, j in get_empty_cells():
+            board[i][j] = -1
+            eval = minimax(depth + 1, 1, alpha, beta)
+            board[i][j] = 0
+            min_eval = min(min_eval, eval)
+            beta = min(beta, eval)
+            if beta <= alpha: break  # Pruning
+        return min_eval
+
 def computer_move():
-    best_score = inf  # Computer wants minimum score
-    for each possible move:
-        score = minimax(0, 1, -inf, inf)  # Start with α=-∞, β=+∞
+    best_score = inf
+    best_move = None
+    
+    for i, j in get_empty_cells():
+        board[i][j] = -1
+        score = minimax(0, 1, -inf, inf)
+        board[i][j] = 0
+        
         if score < best_score:
             best_score = score
-            best_move = current_move
+            best_move = (i, j)
+    
+    if best_move:
+        board[best_move[0]][best_move[1]] = -1
+
+def player_move():
+    while True:
+        try:
+            pos = int(input('Enter position (1-9): ')) - 1
+            row, col = pos // 3, pos % 3
+            if 0 <= pos <= 8 and board[row][col] == 0:
+                board[row][col] = 1
+                break
+            else:
+                print('Invalid move!')
+        except:
+            print('Enter a number 1-9!')
+
+def play_game():
+    print("Tic-Tac-Toe (You: X, Computer: O)")
+    print("Positions: 1-9 (left to right, top to bottom)")
+    
+    current_player = 1 if input('Play first? (y/n): ').lower() == 'y' else -1
+    
+    while True:
+        print_board()
+        
+        if current_player == 1:
+            player_move()
+        else:
+            computer_move()
+            print("Computer's move:")
+        
+        winner = check_winner()
+        if winner or not get_empty_cells():
+            print_board()
+            if winner == 1: print("You win!")
+            elif winner == -1: print("Computer wins!")
+            else: print("It's a draw!")
+            break
+        
+        current_player *= -1
+
+# Driver Code
+if __name__ == "__main__":
+    play_game()
 ```
 
-## Advantages of Alpha-Beta Pruning
+---
 
-1. **Significant Performance Improvement**: Reduces search space dramatically
-2. **Maintains Optimality**: Same result as Minimax, but faster
-3. **Memory Efficient**: No additional memory overhead
-4. **Widely Applicable**: Works with any zero-sum game
+## 🧾 Sample Output
 
-## Applications
-
-- **Game AI**: Chess, Checkers, Go, Tic-Tac-Toe
-- **Decision Trees**: Business and financial decision making
-- **Resource Allocation**: Optimization problems
-- **Strategic Planning**: Military and competitive scenarios
-
-## Running the Code
-
-```bash
-python Exp_3_Alpa_beta_prun.py
-```
-
-### Sample Game Session:
 ```
 Tic-Tac-Toe (You: X, Computer: O)
 Positions: 1-9 (left to right, top to bottom)
@@ -157,49 +216,52 @@ Play first? (y/n): y
 -----------
 Enter position (1-9): 5
 
-| X |   |   |
+|   |   |   |
 -----------
 |   | X |   |
 -----------
 |   |   |   |
 -----------
 Computer's move:
+|   |   |   |
+-----------
+|   | X |   |
+-----------
+| O |   |   |
+-----------
+Enter position (1-9): 1
+
 | X |   |   |
 -----------
 |   | X |   |
 -----------
 | O |   |   |
 -----------
+Computer's move:
+| X |   |   |
+-----------
+|   | X | O |
+-----------
+| O |   |   |
+-----------
 ```
 
-## Complexity Analysis
+---
 
-### Time Complexity
-- **Average Case**: O(b^(3d/4))
-- **Best Case**: O(b^(d/2))
-- **Worst Case**: O(b^d)
+## 🧠 Viva Tips
 
-### Space Complexity
-- **O(d)** where d is maximum depth
-- Same as Minimax (recursive call stack)
+* Alpha-Beta pruning **maintains optimality** while dramatically reducing search time.
+* **α (alpha)** tracks the best score for the **maximizing player**.
+* **β (beta)** tracks the best score for the **minimizing player**.
+* **Pruning condition:** If α ≥ β, eliminate remaining branches.
+* **Best case improvement:** Time complexity reduces from O(b^d) to O(b^(d/2)).
+* **Evaluation function** considers both win/loss and **depth** for strategic play.
+* **Space complexity** remains O(d) same as regular Minimax.
 
-## Optimization Techniques
+---
 
-### 1. Move Ordering
-- Evaluate promising moves first
-- Increases pruning effectiveness
-- Can use domain knowledge or heuristics
+## ✅ Conclusion
 
-### 2. Iterative Deepening
-- Search incrementally deeper levels
-- Provides early results
-- Better move ordering for deeper searches
-
-### 3. Transposition Tables
-- Cache previously computed positions
-- Avoid redundant calculations
-- Significant speedup in practice
-
-## Conclusion
-
-Alpha-Beta pruning is a crucial optimization that makes game-playing algorithms practical for real-world applications. It demonstrates how intelligent pruning strategies can dramatically improve algorithm efficiency without
+**Alpha-Beta pruning** is a crucial optimization that makes game-playing algorithms practical for real-world applications.
+It demonstrates how intelligent pruning strategies can dramatically improve algorithm efficiency without compromising optimality.
+Widely used in **game AI**, **decision trees**, and **strategic planning systems**.

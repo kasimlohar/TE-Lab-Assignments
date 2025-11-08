@@ -1,127 +1,122 @@
-# Experiment 4: N-Queens Problem
+# 🧠 Experiment 4: N-Queens Problem Using Backtracking
 
-## Overview
+## 🎯 Aim
+To implement the **N-Queens problem** using **backtracking algorithm** to place N queens on an N×N chessboard such that no two queens attack each other, demonstrating constraint satisfaction problem solving.
 
-The N-Queens problem is a classic constraint satisfaction problem in computer science and artificial intelligence. The challenge is to place N chess queens on an N×N chessboard such that no two queens attack each other.
+---
 
-## Problem Statement
+## 📘 Theory (For Viva)
 
-Given an N×N chessboard, place N queens such that:
-- No two queens are in the same row
-- No two queens are in the same column  
-- No two queens are on the same diagonal
+### 👑 N-Queens Problem Overview
+- **Concept:**  
+  The N-Queens problem is a classic constraint satisfaction problem where we place N queens on an N×N chessboard such that no two queens can attack each other.
+- **Key Challenge:** Queens can attack horizontally, vertically, and diagonally
+- **Applications:** Constraint satisfaction, VLSI design, task scheduling, resource allocation.
 
-## Theory and Algorithm
+### 🔄 Backtracking Algorithm
+- **Concept:**  
+  Backtracking is a systematic method that builds solutions incrementally and abandons candidates (backtracks) when they cannot lead to a valid solution.
+- **Strategy:** Try → Check → Backtrack if invalid → Try next option
+- **Applications:** Puzzle solving, game AI, optimization problems.
 
-### Backtracking Algorithm
+**Key Steps:**
+1. Place queens row by row starting from the first row
+2. For each row, try placing queen in each column
+3. Check if current placement is safe (no conflicts)
+4. If safe, move to next row recursively
+5. If not safe or no solution found, backtrack and try next column
 
-The N-Queens problem is solved using **backtracking**, which is a systematic method for solving constraint satisfaction problems by:
-
-1. **Incremental Construction**: Build solution step by step
-2. **Constraint Checking**: Verify constraints at each step
-3. **Backtrack**: Undo choices when constraints are violated
-4. **Explore Alternatives**: Try different possibilities systematically
-
-### Algorithm Steps
-
+**Algorithm:**
 ```
-function solveNQueens(n):
-    board = array of size n, initialized to -1
-    solutions = empty list
-    
-    function backtrack(row):
+N_QUEENS(n):
+1. Initialize board[n] = [-1, -1, ..., -1]
+2. Initialize solutions = empty list
+3. Call BACKTRACK(0)
+
+BACKTRACK(row):
+1. IF row == n:
+   Add current board configuration to solutions
+   RETURN
+
+2. FOR col = 0 to n-1:
+   IF IS_SAFE(board, row, col):
+     Place queen at board[row] = col
+     BACKTRACK(row + 1)
+     // Implicit backtrack when function returns
+
+IS_SAFE(board, row, col):
+1. FOR i = 0 to row-1:
+   IF board[i] == col:           // Same column
+     RETURN FALSE
+   IF board[i] - i == col - row: // Main diagonal
+     RETURN FALSE  
+   IF board[i] + i == col + row: // Anti-diagonal
+     RETURN FALSE
+2. RETURN TRUE
+```
+
+---
+
+## 💻 Python Code
+
+```python
+# N-Queens Problem Implementation using Backtracking
+
+def is_safe(board, row, col):
+    # Check if no queens threaten the current cell in the same column
+    for i in range(row):
+        if board[i] == col or \
+           board[i] - i == col - row or \
+           board[i] + i == col + row:
+            return False
+    return True
+
+def solve_n_queens(n):
+    def backtrack(row):
         if row == n:
-            add current board to solutions
+            solutions.append(board[:])
             return
-        
-        for col from 0 to n-1:
-            if isSafe(board, row, col):
-                place queen at (row, col)
+        for col in range(n):
+            if is_safe(board, row, col):
+                board[row] = col
                 backtrack(row + 1)
-                remove queen (implicit backtrack)
-    
+
+    board = [-1] * n  # Initialize an empty chessboard
+    solutions = []
     backtrack(0)
     return solutions
+
+def print_solution(board):
+    for row in board:
+        line = ['.'] * len(board)
+        line[row] = 'Q'
+        print(' '.join(line))
+    print()
+
+def main():
+    try:
+        n = int(input("Enter the number of queens (e.g., 4): "))
+        if n < 4:
+            print("The number of queens must be at least 4.")
+            return
+        solutions = solve_n_queens(n)
+        if solutions:
+            print(f"Found {len(solutions)} solution(s) for {n}-queens problem:")
+            for i, solution in enumerate(solutions):
+                print(f"Solution {i + 1}:")
+                print_solution(solution)
+        else:
+            print(f"No solution found for {n}-queens problem.")
+    except ValueError:
+        print("Invalid input. Please enter a valid integer.")
+
+if __name__ == "__main__":
+    main()
 ```
 
-### Constraint Checking
+---
 
-The [`is_safe`](Exp_4_nQeens.py) function checks three types of conflicts:
-
-#### 1. Column Conflict
-```python
-board[i] == col
-```
-Checks if any queen in previous rows is in the same column.
-
-#### 2. Main Diagonal Conflict
-```python
-board[i] - i == col - row
-```
-Queens on the main diagonal (top-left to bottom-right) have the property that `row - col` is constant.
-
-#### 3. Anti-Diagonal Conflict
-```python
-board[i] + i == col + row
-```
-Queens on the anti-diagonal (top-right to bottom-left) have the property that `row + col` is constant.
-
-## Implementation Details
-
-### Board Representation
-- **1D Array**: `board[row] = col` means queen at position (row, col)
-- **Space Efficient**: O(n) space instead of O(n²)
-- **Fast Access**: Direct indexing for constraint checking
-
-### Key Functions
-
-#### [`solve_n_queens`](Exp_4_nQeens.py)
-- Main solving function using backtracking
-- Returns list of all valid solutions
-- Uses nested [`backtrack`](Exp_4_nQeens.py) function for recursion
-
-#### [`print_solution`](Exp_4_nQeens.py)
-- Converts board representation to visual format
-- Uses 'Q' for queens and '.' for empty squares
-- Displays each solution clearly
-
-## Complexity Analysis
-
-### Time Complexity
-- **Worst Case**: O(N!)
-- **Average Case**: Much better due to early pruning
-- **Pruning Factor**: Constraint checking eliminates many branches early
-
-### Space Complexity
-- **Recursion Stack**: O(N) for recursive calls
-- **Board Storage**: O(N) for board representation
-- **Total**: O(N)
-
-## Mathematical Properties
-
-### Number of Solutions
-
-| N | Solutions |
-|---|-----------|
-| 1 | 1 |
-| 4 | 2 |
-| 5 | 10 |
-| 6 | 4 |
-| 8 | 92 |
-| 10 | 724 |
-
-### Symmetries
-- Each solution has up to 8 symmetric variants
-- Rotations: 0°, 90°, 180°, 270°
-- Reflections: horizontal, vertical, diagonal
-
-## Running the Code
-
-```bash
-python Exp_4_nQeens.py
-```
-
-### Sample Execution
+## 🧾 Sample Output
 
 ```
 Enter the number of queens (e.g., 4): 4
@@ -137,74 +132,37 @@ Solution 2:
 Q . . .
 . . . Q
 . Q . .
+
+Enter the number of queens (e.g., 4): 8
+Found 92 solution(s) for 8-queens problem:
+Solution 1:
+Q . . . . . . .
+. . . . Q . . .
+. . . . . . . Q
+. . . . . Q . .
+. . Q . . . . .
+. . . . . . Q .
+. Q . . . . . .
+. . . Q . . . .
+...
 ```
 
-## Optimization Techniques
+---
 
-### 1. Early Constraint Checking
-- Check constraints before placing queen
-- Avoid invalid placements entirely
-- Reduces search tree significantly
+## 🧠 Viva Tips
 
-### 2. Heuristic Improvements
-- **Most Constrained Variable**: Choose row/column with fewest options
-- **Least Constraining Value**: Choose placement that eliminates fewest future options
+* **Backtracking** systematically explores solution space and **backtracks** when constraints are violated.
+* **Constraint checking** happens in three directions: **column**, **main diagonal**, **anti-diagonal**.
+* **1D array representation**: `board[row] = col` saves space and simplifies logic.
+* **Time complexity**: O(N!) due to factorial permutations, but **pruning** significantly reduces actual searches.
+* **Space complexity**: O(N) for board storage and recursion stack.
+* **Diagonal formulas**: Main diagonal: `row - col = constant`, Anti-diagonal: `row + col = constant`.
+* **Applications**: VLSI design, task scheduling, constraint satisfaction problems.
 
-### 3. Symmetry Breaking
-- Fix first queen position to reduce equivalent solutions
-- Can reduce search space by factor of 8
+---
 
-## Applications and Extensions
+## ✅ Conclusion
 
-### Real-World Applications
-- **VLSI Design**: Component placement on circuit boards
-- **Task Scheduling**: Resource allocation with conflicts
-- **Graph Coloring**: Conflict-free assignment problems
-- **Facility Location**: Placing facilities to avoid interference
-
-### Problem Variations
-- **Minimum Queens**: Find minimum queens to attack all squares
-- **Super Queens**: Queens that also move like knights
-- **Toroidal Board**: Wrap-around edges
-- **3D N-Queens**: Extension to three dimensions
-
-## Educational Value
-
-### Concepts Demonstrated
-- **Backtracking Algorithm**: Systematic search with pruning
-- **Constraint Satisfaction**: Managing multiple constraints
-- **Recursion**: Clean recursive problem decomposition
-- **State Space Search**: Exploring solution space efficiently
-
-### Learning Objectives
-- Understand backtracking paradigm
-- Learn constraint satisfaction techniques
-- Practice recursive problem solving
-- Analyze algorithmic complexity
-
-## Historical Context
-
-- **Origin**: First studied by chess player Max Bezzel in 1848
-- **8-Queens**: Classic version with 92 solutions
-- **Computer Science**: Became standard AI problem in 1960s
-- **Modern Usage**: Benchmark for constraint satisfaction algorithms
-
-## Error Handling
-
-The implementation includes robust error handling:
-
-```python
-try:
-    n = int(input("Enter the number of queens (e.g., 4): "))
-    if n < 4:
-        print("The number of queens must be at least 4.")
-        return
-except ValueError:
-    print("Invalid input. Please enter a valid integer.")
-```
-
-## Conclusion
-
-The N-Queens problem elegantly demonstrates the power of backtracking algorithms in solving constraint satisfaction problems. It provides an excellent introduction to systematic search techniques while being simple enough to understand and implement, yet complex enough to showcase important algorithmic concepts.
-
-The backtracking solution efficiently prunes the search space by checking constraints early, making it practical for reasonable values of N while providing all possible solutions to the problem.
+The **N-Queens problem** demonstrates the power of **backtracking algorithms** in solving constraint satisfaction problems.
+It showcases systematic search with intelligent pruning, making it efficient for practical problem sizes.
+Widely used to teach **recursive problem solving** and **constraint satisfaction techniques** in AI and computer science.
